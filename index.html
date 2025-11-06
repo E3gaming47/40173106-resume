@@ -4,41 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daniel Ebadi - Concept Artist</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="#home">HOME</a></li>
-            <li><a href="#portfolio">Portfolio</a></li>
-        </ul>
-    </nav>
-
-    <div>
-        <section id="home">
-            <h1>Daniel Ebadi</h1>
-            <p>
-                My name is Daniel Ebadi, I'm currently a junior freelance concept artist, while also studying for a bachelor's degree in computer engineering at SCU.
-            </p>
-            
-            <div>
-                <h2>Brief Look at Fields I Have Worked On:</h2>
-                <p>
-                    I have worked on a bunch of projects ranging from character concept design to environment concept art and my favourite field is Visual Development
-                </p>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo">DE</div>
+                <div class="logo-subtitle">Concept Artist</div>
             </div>
-
-            <div>
-                <h2>How to Contact:</h2>
-                <p>
-                    <a href="mailto:e3gaming47@gmail.com">e3gaming47@gmail.com</a>
-                </p>
+            <div class="header-center">
+                <div class="header-divider"></div>
+                <div class="header-tagline">Visual Development Specialist</div>
+                <div class="header-divider"></div>
             </div>
-        </section>
+            <nav>
+                <ul>
+                    <li><a href="index.html">HOME</a></li>
+                    <li><a href="portfolio.html">PORTFOLIO</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-decoration"></div>
+    </header>
 
-        <section id="portfolio">
-            <h2>Portfolio</h2>
-        </section>
-    </div>
+    <main>
+        <div class="background-art"></div>
+        <div class="content-box">
+            <input type="checkbox" id="toggleBtn" class="toggle-checkbox">
+            <label for="toggleBtn" class="toggle-btn"></label>
+            <section id="home">
+                <h1>Daniel Ebadi</h1>
+                <div class="about-section">
+                    <p>
+                        My name is Daniel Ebadi, I'm currently a junior freelance concept artist, while also studying for a bachelor's degree in computer engineering at SCU.
+                    </p>
+                </div>
+                
+                <div class="fields-section">
+                    <h2>Brief Look at Fields I Have Worked On:</h2>
+                    <p>
+                        I have worked on a bunch of projects ranging from character concept design to environment concept art and my favourite field is Visual Development
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-label">Contact</div>
+            <div class="footer-divider"></div>
+            <a href="mailto:e3gaming47@gmail.com" class="footer-email">
+                <span class="email-icon">✉</span>
+                <span>e3gaming47@gmail.com</span>
+            </a>
+        </div>
+    </footer>
 </body>
 </html>
 
