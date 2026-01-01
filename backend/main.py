@@ -433,9 +433,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # Note: For production deployment on Liara, use: uvicorn main:app --host 0.0.0.0 --port 80 --workers 1
 # The if __name__ == "__main__" block is only for local development
-if __name__ == "__main__":
-    import uvicorn
-    # Local development only
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="info", reload=True)
+# Commented out to prevent Liara from using python3 main.py
+# if __name__ == "__main__":
+#     import uvicorn
+#     # Local development only
+#     port = int(os.getenv("PORT", 8000))
+#     uvicorn.run(app, host="127.0.0.1", port=port, log_level="info", reload=True)
 
