@@ -4,12 +4,7 @@
   "build": {
     "commands": [
       "pip install -r requirements.txt",
-      "mkdir -p static",
-      "cp ../index.html static/ 2>/dev/null || true",
-      "cp ../portfolio.html static/ 2>/dev/null || true",
-      "cp ../admin.html static/ 2>/dev/null || true",
-      "cp ../styles.css static/ 2>/dev/null || true",
-      "cp ../portfolio.css static/ 2>/dev/null || true"
+      "ls -la static/ || echo 'Static directory check'"
     ]
   },
   "start": {
