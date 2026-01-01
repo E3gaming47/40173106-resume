@@ -312,6 +312,11 @@ async def serve_index():
     </html>
     """)
 
+@app.get("/index.html", response_class=HTMLResponse)
+async def serve_index_html():
+    """Serve index.html at /index.html route for navigation compatibility"""
+    return await serve_index()
+
 @app.get("/portfolio.html", response_class=HTMLResponse)
 async def serve_portfolio():
     """Serve the portfolio page"""
@@ -331,6 +336,17 @@ async def serve_admin():
     if os.path.exists(admin_path):
         return FileResponse(admin_path)
     raise HTTPException(status_code=404, detail=f"Admin page not found at {admin_path}")
+
+# Additional routes for navigation compatibility (without .html extension)
+@app.get("/portfolio", response_class=HTMLResponse)
+async def serve_portfolio_short():
+    """Serve portfolio at /portfolio route"""
+    return await serve_portfolio()
+
+@app.get("/admin", response_class=HTMLResponse)
+async def serve_admin_short():
+    """Serve admin at /admin route"""
+    return await serve_admin()
 
 @app.get("/health")
 async def health_check():
