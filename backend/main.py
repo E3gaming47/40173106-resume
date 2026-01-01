@@ -7,10 +7,21 @@ from typing import List, Optional
 import jwt
 import secrets
 from pydantic import BaseModel, EmailStr
-from database import SessionLocal, engine, Base
-from models import ProjectRequest, User
 import os
 import sys
+
+# Import database components - these are lazy and won't fail until used
+try:
+    from database import SessionLocal, engine, Base
+    from models import ProjectRequest, User
+except Exception as e:
+    print(f"⚠️ Warning: Database import failed: {e}", file=sys.stderr, flush=True)
+    # Create dummy objects to allow app to start
+    SessionLocal = None
+    engine = None
+    Base = None
+    ProjectRequest = None
+    User = None
 
 # Database tables will be created on startup event
 
@@ -72,6 +83,8 @@ manager = ConnectionManager()
 
 # Database dependency
 def get_db():
+    if SessionLocal is None:
+        raise HTTPException(status_code=503, detail="Database not available")
     db = SessionLocal()
     try:
         yield db
@@ -153,6 +166,15 @@ def init_admin_user(db: Session):
 # Routes
 @app.on_event("startup")
 async def startup_event():
+    """Initialize database on startup - non-blocking, app will start even if DB fails"""
+    print("🚀 Starting application...", file=sys.stdout, flush=True)
+    
+    # Check if database components are available
+    if engine is None or Base is None:
+        print("⚠️ Database not available - app will start in limited mode", file=sys.stderr, flush=True)
+        print("✅ Application started (database disabled)", file=sys.stdout, flush=True)
+        return
+    
     try:
         from database import SQLALCHEMY_DATABASE_URL
         
@@ -172,7 +194,7 @@ async def startup_event():
             except Exception as e:
                 print(f"⚠️ Could not create /tmp: {e}", file=sys.stderr, flush=True)
         
-        # Ensure database tables exist
+        # Ensure database tables exist (non-blocking)
         try:
             Base.metadata.create_all(bind=engine)
             print("✅ Database tables created/verified", file=sys.stdout, flush=True)
@@ -182,7 +204,7 @@ async def startup_event():
             traceback.print_exc(file=sys.stderr)
             # Continue anyway - app can still start
         
-        # Initialize admin user
+        # Initialize admin user (non-blocking)
         try:
             db = SessionLocal()
             try:
@@ -199,8 +221,7 @@ async def startup_event():
         import traceback
         traceback.print_exc(file=sys.stderr)
         # Don't fail the app, just log the error
-        # App will still start but database operations might fail
-        print("⚠️ Application starting with limited functionality", file=sys.stdout, flush=True)
+        print("✅ Application started (with database warnings)", file=sys.stdout, flush=True)
 
 @app.get("/")
 async def root():

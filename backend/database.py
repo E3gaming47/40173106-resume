@@ -56,10 +56,13 @@ else:
     connect_args = {"check_same_thread": False}
 
 # Create engine with lazy connection (doesn't connect until first use)
+# Use echo=False to avoid connection attempts during import
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
     connect_args=connect_args,
-    pool_pre_ping=True  # Verify connections before using
+    pool_pre_ping=True,  # Verify connections before using
+    echo=False,  # Don't log SQL queries
+    poolclass=None  # Use default pool
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
