@@ -6,6 +6,46 @@
     <title>Daniel Ebadi - Concept Artist</title>
     <link rel="stylesheet" href="styles.css">
     <script>
+        // Set active navigation link and smooth scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set active navigation link
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            const navLinks = document.querySelectorAll('nav ul li a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+                    link.classList.add('active');
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                    });
+                }
+            });
+            
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe sections
+            document.querySelectorAll('section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                section.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                observer.observe(section);
+            });
+        });
+        
         // WebSocket connection for online users
         const API_BASE_URL = 'http://localhost:8000';
         let ws = null;
@@ -35,23 +75,56 @@
             };
         }
         
-        // Form submission
+        // Form submission with enhanced UX
         document.addEventListener('DOMContentLoaded', () => {
             connectWebSocket();
             
             const form = document.getElementById('projectRequestForm');
             const messageDiv = document.getElementById('form-message');
+            const submitBtn = form.querySelector('.submit-btn');
+            const inputs = form.querySelectorAll('input, textarea, select');
             
+            // Add real-time validation
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => validateField(input));
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('error')) {
+                        validateField(input);
+                    }
+                });
+            });
+            
+            // Enhanced form submission
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
+                // Validate all fields
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (!validateField(input)) {
+                        isValid = false;
+                    }
+                });
+                
+                if (!isValid) {
+                    messageDiv.textContent = 'Please fill in all required fields correctly.';
+                    messageDiv.className = 'form-message error';
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                messageDiv.textContent = '';
+                messageDiv.className = 'form-message';
+                
                 const formData = {
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value,
-                    project_description: document.getElementById('project_description').value,
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    project_description: document.getElementById('project_description').value.trim(),
                     project_type: document.getElementById('project_type').value,
-                    budget: document.getElementById('budget').value,
-                    timeline: document.getElementById('timeline').value
+                    budget: document.getElementById('budget').value.trim(),
+                    timeline: document.getElementById('timeline').value.trim()
                 };
                 
                 try {
@@ -64,23 +137,67 @@
                     });
                     
                     if (response.ok) {
-                        messageDiv.textContent = 'Request submitted successfully!';
+                        messageDiv.textContent = '✓ Request submitted successfully! We\'ll get back to you soon.';
                         messageDiv.className = 'form-message success';
                         form.reset();
+                        inputs.forEach(input => input.classList.remove('error', 'success'));
+                        
+                        // Scroll to message
+                        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        
                         setTimeout(() => {
                             messageDiv.textContent = '';
                             messageDiv.className = 'form-message';
-                        }, 5000);
+                        }, 6000);
                     } else {
                         const error = await response.json();
-                        messageDiv.textContent = error.detail || 'Error submitting request';
+                        messageDiv.textContent = error.detail || 'Error submitting request. Please try again.';
                         messageDiv.className = 'form-message error';
                     }
                 } catch (error) {
-                    messageDiv.textContent = 'Network error. Please try again.';
+                    messageDiv.textContent = 'Network error. Please check your connection and try again.';
                     messageDiv.className = 'form-message error';
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('loading');
                 }
             });
+            
+            // Validation function
+            function validateField(field) {
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+                
+                // Remove previous states
+                field.classList.remove('error', 'success');
+                
+                // Required field check
+                if (field.hasAttribute('required') && !value) {
+                    isValid = false;
+                    errorMessage = 'This field is required';
+                }
+                
+                // Email validation
+                if (field.type === 'email' && value) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Please enter a valid email address';
+                    }
+                }
+                
+                // Apply validation state
+                if (field.hasAttribute('required') || (field.type === 'email' && value)) {
+                    if (isValid && value) {
+                        field.classList.add('success');
+                    } else if (!isValid) {
+                        field.classList.add('error');
+                    }
+                }
+                
+                return isValid;
+            }
         });
     </script>
 </head>

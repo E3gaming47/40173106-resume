@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio - Daniel Ebadi</title>
     <link rel="stylesheet" href="portfolio.css">
+    <script>
+        // Set active navigation link
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPage = window.location.pathname.split('/').pop() || 'portfolio.html';
+            const navLinks = document.querySelectorAll('nav ul li a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                    });
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <header>
