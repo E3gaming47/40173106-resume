@@ -154,10 +154,12 @@ def init_admin_user(db: Session):
 @app.on_event("startup")
 async def startup_event():
     try:
-        # Ensure /tmp directory exists (for SQLite in containers)
-        import os
-        if not os.path.exists("/tmp"):
-            os.makedirs("/tmp", exist_ok=True)
+        from database import SQLALCHEMY_DATABASE_URL
+        
+        # Ensure /tmp directory exists (only for SQLite in containers)
+        if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+            if not os.path.exists("/tmp"):
+                os.makedirs("/tmp", exist_ok=True)
         
         # Ensure database tables exist
         Base.metadata.create_all(bind=engine)
@@ -168,7 +170,9 @@ async def startup_event():
             init_admin_user(db)
         finally:
             db.close()
-        print("✅ Application started successfully", file=sys.stdout, flush=True)
+        
+        db_type = "MSSQL" if "mssql" in SQLALCHEMY_DATABASE_URL.lower() else "SQLite"
+        print(f"✅ Application started successfully with {db_type} database", file=sys.stdout, flush=True)
     except Exception as e:
         print(f"⚠️ Startup warning: {e}", file=sys.stderr, flush=True)
         import traceback
