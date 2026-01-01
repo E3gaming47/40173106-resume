@@ -12,11 +12,7 @@ from models import ProjectRequest, User
 import os
 import sys
 
-# Create database tables (only if they don't exist)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Database initialization note: {e}")
+# Database tables will be created on startup event
 
 app = FastAPI(
     title="Resume Backend API",
@@ -170,11 +166,22 @@ async def startup_event():
         print("✅ Application started successfully", file=sys.stdout, flush=True)
     except Exception as e:
         print(f"⚠️ Startup warning: {e}", file=sys.stderr, flush=True)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         # Don't fail the app, just log the error
 
 @app.get("/")
 async def root():
-    return {"message": "Resume Backend API", "docs": "/docs"}
+    return {
+        "message": "Resume Backend API",
+        "docs": "/docs",
+        "status": "running",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "resume-api"}
 
 @app.post("/api/auth/login", response_model=TokenResponse)
 async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
