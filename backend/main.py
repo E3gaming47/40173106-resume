@@ -434,6 +434,8 @@ async def websocket_endpoint(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
     # لیارا از پورت 80 استفاده می‌کند
+    # در Liara، PORT environment variable تنظیم می‌شود
     port = int(os.getenv("PORT", 80))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    # اطمینان از اینکه روی 0.0.0.0 و پورت صحیح اجرا می‌شود
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
 
