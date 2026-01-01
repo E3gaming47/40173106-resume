@@ -22,12 +22,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY *.py ./
 COPY requirements.txt ./
 
-# کپی کردن فایل‌های فرانت‌اند از دایرکتوری والد
-COPY ../index.html ./
-COPY ../portfolio.html ./
-COPY ../admin.html ./
-COPY ../styles.css ./
-COPY ../portfolio.css ./
+# ایجاد دایرکتوری static و کپی فایل‌های فرانت‌اند
+RUN mkdir -p static
+COPY ../index.html static/
+COPY ../portfolio.html static/
+COPY ../admin.html static/
+COPY ../styles.css static/
+COPY ../portfolio.css static/
 
 # لیارا از پورت 80 استفاده می‌کند
 ENV PORT=80

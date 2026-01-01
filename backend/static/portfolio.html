@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Daniel Ebadi</title>
+    <link rel="stylesheet" href="portfolio.css">
+    <script>
+        // Set active navigation link
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPage = window.location.pathname.split('/').pop() || 'portfolio.html';
+            const navLinks = document.querySelectorAll('nav ul li a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo">DE</div>
+                <div class="logo-subtitle">Concept Artist</div>
+            </div>
+            <div class="header-center">
+                <div class="header-divider"></div>
+                <div class="header-tagline">Visual Development Specialist</div>
+                <div class="header-divider"></div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">HOME</a></li>
+                    <li><a href="portfolio.html">PORTFOLIO</a></li>
+                    <li><a href="admin.html">ADMIN</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-decoration"></div>
+    </header>
+
+    <main>
+        <div class="background-art"></div>
+        <div class="content-box">
+            <section id="portfolio">
+                <h2>Portfolio</h2>
+                <p style="text-align: center; font-size: 1.2rem; margin-top: 3rem; color: #cccccc;">
+                    Arts to be uploaded soon
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-label">Contact</div>
+            <div class="footer-divider"></div>
+            <a href="mailto:e3gaming47@gmail.com" class="footer-email">
+                <span class="email-icon">✉</span>
+                <span>e3gaming47@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>
+
