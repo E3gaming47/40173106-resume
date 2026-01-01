@@ -154,6 +154,11 @@ def init_admin_user(db: Session):
 @app.on_event("startup")
 async def startup_event():
     try:
+        # Ensure /tmp directory exists (for SQLite in containers)
+        import os
+        if not os.path.exists("/tmp"):
+            os.makedirs("/tmp", exist_ok=True)
+        
         # Ensure database tables exist
         Base.metadata.create_all(bind=engine)
         
@@ -169,6 +174,7 @@ async def startup_event():
         import traceback
         traceback.print_exc(file=sys.stderr)
         # Don't fail the app, just log the error
+        # App will still start but database operations might fail
 
 @app.get("/")
 async def root():
