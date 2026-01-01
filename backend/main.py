@@ -236,9 +236,28 @@ async def api_status():
     }
 
 # Mount static files directory for CSS, JS, and other assets
-static_dir = os.path.join(os.path.dirname(__file__), "static")
+def get_static_dir():
+    """Get the static directory path, checking multiple locations"""
+    base_dir = os.path.dirname(__file__)
+    # Try current directory first
+    static_dir = os.path.join(base_dir, "static")
+    if os.path.exists(static_dir):
+        return static_dir
+    # Try parent directory
+    static_dir = os.path.join(os.path.dirname(base_dir), "static")
+    if os.path.exists(static_dir):
+        return static_dir
+    # Return default
+    return os.path.join(base_dir, "static")
+
+static_dir = get_static_dir()
+print(f"Static directory: {static_dir}, exists: {os.path.exists(static_dir)}", file=sys.stderr, flush=True)
 if os.path.exists(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    try:
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+        print(f"Mounted static files from: {static_dir}", file=sys.stderr, flush=True)
+    except Exception as e:
+        print(f"Error mounting static files: {e}", file=sys.stderr, flush=True)
     
     # Also serve CSS files at root level for compatibility
     @app.get("/styles.css")
@@ -256,26 +275,52 @@ if os.path.exists(static_dir):
         if os.path.exists(css_path):
             return FileResponse(css_path, media_type="text/css")
         raise HTTPException(status_code=404, detail="Portfolio stylesheet not found")
+else:
+    print(f"WARNING: Static directory not found at {static_dir}", file=sys.stderr, flush=True)
+
+# Helper function to get static directory path
+def get_static_dir():
+    """Get the static directory path, checking multiple locations"""
+    base_dir = os.path.dirname(__file__)
+    # Try current directory first
+    static_dir = os.path.join(base_dir, "static")
+    if os.path.exists(static_dir):
+        return static_dir
+    # Try parent directory
+    static_dir = os.path.join(os.path.dirname(base_dir), "static")
+    if os.path.exists(static_dir):
+        return static_dir
+    # Return default
+    return os.path.join(base_dir, "static")
 
 # Serve frontend HTML files from static directory
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
     """Serve the main index.html page"""
-    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    static_dir = get_static_dir()
     index_path = os.path.join(static_dir, "index.html")
+    
+    # Debug logging
+    print(f"Looking for index.html at: {index_path}", file=sys.stderr, flush=True)
+    print(f"Static dir exists: {os.path.exists(static_dir)}", file=sys.stderr, flush=True)
+    if os.path.exists(static_dir):
+        print(f"Files in static dir: {os.listdir(static_dir)}", file=sys.stderr, flush=True)
     
     if os.path.exists(index_path):
         return FileResponse(index_path)
     
-    # Fallback message
-    return HTMLResponse("""
+    # Fallback message with debug info
+    return HTMLResponse(f"""
     <html>
     <head><title>Resume API</title></head>
     <body>
         <h1>Resume Backend API</h1>
         <p>Status: Running</p>
         <p><a href="/docs">API Documentation</a></p>
-        <p>Frontend files not found. Please ensure index.html is in backend/static/</p>
+        <p>Frontend files not found.</p>
+        <p>Looking for: {index_path}</p>
+        <p>Static dir exists: {os.path.exists(static_dir)}</p>
+        <p>Current dir: {os.path.dirname(__file__)}</p>
     </body>
     </html>
     """)
@@ -283,20 +328,22 @@ async def serve_index():
 @app.get("/portfolio.html", response_class=HTMLResponse)
 async def serve_portfolio():
     """Serve the portfolio page"""
-    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    static_dir = get_static_dir()
     portfolio_path = os.path.join(static_dir, "portfolio.html")
+    print(f"Looking for portfolio.html at: {portfolio_path}", file=sys.stderr, flush=True)
     if os.path.exists(portfolio_path):
         return FileResponse(portfolio_path)
-    raise HTTPException(status_code=404, detail="Portfolio page not found")
+    raise HTTPException(status_code=404, detail=f"Portfolio page not found at {portfolio_path}")
 
 @app.get("/admin.html", response_class=HTMLResponse)
 async def serve_admin():
     """Serve the admin page"""
-    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    static_dir = get_static_dir()
     admin_path = os.path.join(static_dir, "admin.html")
+    print(f"Looking for admin.html at: {admin_path}", file=sys.stderr, flush=True)
     if os.path.exists(admin_path):
         return FileResponse(admin_path)
-    raise HTTPException(status_code=404, detail="Admin page not found")
+    raise HTTPException(status_code=404, detail=f"Admin page not found at {admin_path}")
 
 @app.get("/health")
 async def health_check():
