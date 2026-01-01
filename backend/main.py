@@ -278,21 +278,6 @@ if os.path.exists(static_dir):
 else:
     print(f"WARNING: Static directory not found at {static_dir}", file=sys.stderr, flush=True)
 
-# Helper function to get static directory path
-def get_static_dir():
-    """Get the static directory path, checking multiple locations"""
-    base_dir = os.path.dirname(__file__)
-    # Try current directory first
-    static_dir = os.path.join(base_dir, "static")
-    if os.path.exists(static_dir):
-        return static_dir
-    # Try parent directory
-    static_dir = os.path.join(os.path.dirname(base_dir), "static")
-    if os.path.exists(static_dir):
-        return static_dir
-    # Return default
-    return os.path.join(base_dir, "static")
-
 # Serve frontend HTML files from static directory
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
