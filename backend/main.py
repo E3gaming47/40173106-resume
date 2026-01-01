@@ -280,9 +280,10 @@ else:
     print(f"WARNING: Static directory not found at {static_dir}", file=sys.stderr, flush=True)
 
 # Serve frontend HTML files from static directory
+# Frontend HTML serving is ACTIVE - serves index.html, portfolio.html, admin.html
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    """Serve the main index.html page"""
+    """Serve the main index.html page - Frontend serving is ACTIVE"""
     static_dir = get_static_dir()
     index_path = os.path.join(static_dir, "index.html")
     
