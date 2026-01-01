@@ -30,11 +30,36 @@ else:
     # Fallback to SQLite - use /tmp for writable directory in containers
     # Liara containers need a writable path
     db_file = "resume.db"
-    SQLALCHEMY_DATABASE_URL = f"sqlite:////tmp/{db_file}"
+    
+    # Try multiple paths for SQLite
+    possible_paths = [
+        "/tmp/resume.db",  # Preferred for containers
+        "./resume.db",     # Fallback to current directory
+        "resume.db"        # Last resort
+    ]
+    
+    # Use /tmp if it exists and is writable, otherwise use current directory
+    import os
+    if os.path.exists("/tmp") and os.access("/tmp", os.W_OK):
+        SQLALCHEMY_DATABASE_URL = f"sqlite:////tmp/{db_file}"
+    else:
+        # Try to create /tmp if it doesn't exist
+        try:
+            os.makedirs("/tmp", exist_ok=True)
+            if os.access("/tmp", os.W_OK):
+                SQLALCHEMY_DATABASE_URL = f"sqlite:////tmp/{db_file}"
+            else:
+                SQLALCHEMY_DATABASE_URL = f"sqlite:///./{db_file}"
+        except:
+            SQLALCHEMY_DATABASE_URL = f"sqlite:///./{db_file}"
+    
     connect_args = {"check_same_thread": False}
 
+# Create engine with lazy connection (doesn't connect until first use)
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args=connect_args
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args=connect_args,
+    pool_pre_ping=True  # Verify connections before using
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -158,18 +158,39 @@ async def startup_event():
         
         # Ensure /tmp directory exists (only for SQLite in containers)
         if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
-            if not os.path.exists("/tmp"):
-                os.makedirs("/tmp", exist_ok=True)
+            try:
+                if not os.path.exists("/tmp"):
+                    os.makedirs("/tmp", exist_ok=True)
+                # Verify /tmp is writable
+                test_file = "/tmp/.test_write"
+                try:
+                    with open(test_file, "w") as f:
+                        f.write("test")
+                    os.remove(test_file)
+                except:
+                    print("⚠️ /tmp is not writable, using current directory", file=sys.stderr, flush=True)
+            except Exception as e:
+                print(f"⚠️ Could not create /tmp: {e}", file=sys.stderr, flush=True)
         
         # Ensure database tables exist
-        Base.metadata.create_all(bind=engine)
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("✅ Database tables created/verified", file=sys.stdout, flush=True)
+        except Exception as db_error:
+            print(f"⚠️ Database initialization error: {db_error}", file=sys.stderr, flush=True)
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+            # Continue anyway - app can still start
         
         # Initialize admin user
-        db = SessionLocal()
         try:
-            init_admin_user(db)
-        finally:
-            db.close()
+            db = SessionLocal()
+            try:
+                init_admin_user(db)
+            finally:
+                db.close()
+        except Exception as user_error:
+            print(f"⚠️ Admin user initialization error: {user_error}", file=sys.stderr, flush=True)
         
         db_type = "MSSQL" if "mssql" in SQLALCHEMY_DATABASE_URL.lower() else "SQLite"
         print(f"✅ Application started successfully with {db_type} database", file=sys.stdout, flush=True)
@@ -179,6 +200,7 @@ async def startup_event():
         traceback.print_exc(file=sys.stderr)
         # Don't fail the app, just log the error
         # App will still start but database operations might fail
+        print("⚠️ Application starting with limited functionality", file=sys.stdout, flush=True)
 
 @app.get("/")
 async def root():
