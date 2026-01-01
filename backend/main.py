@@ -354,6 +354,27 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+# Debug endpoint to reset admin password (remove in production!)
+@app.post("/api/auth/reset-admin")
+async def reset_admin_password(db: Session = Depends(get_db)):
+    """Reset admin password to default (admin123) - FOR DEBUGGING ONLY"""
+    import hashlib
+    admin = db.query(User).filter(User.username == "admin").first()
+    
+    if not admin:
+        # Create admin if doesn't exist
+        password_hash = hashlib.sha256("admin123".encode()).hexdigest()
+        admin = User(username="admin", password_hash=password_hash)
+        db.add(admin)
+        db.commit()
+        return {"message": "Admin user created", "username": "admin", "password": "admin123"}
+    else:
+        # Reset password
+        password_hash = hashlib.sha256("admin123".encode()).hexdigest()
+        admin.password_hash = password_hash
+        db.commit()
+        return {"message": "Admin password reset", "username": "admin", "password": "admin123"}
+
 @app.post("/api/project-requests", response_model=ProjectRequestResponse)
 async def create_project_request(request: ProjectRequestCreate, db: Session = Depends(get_db)):
     db_request = ProjectRequest(
