@@ -5,6 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daniel Ebadi - Concept Artist</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // WebSocket connection for online users
+        const API_BASE_URL = 'http://localhost:8000';
+        let ws = null;
+        
+        function connectWebSocket() {
+            const wsUrl = API_BASE_URL.replace('http', 'ws') + '/ws/online-users';
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'online_count') {
+                    document.getElementById('online-count').textContent = data.count;
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = () => {
+                console.log('WebSocket disconnected, reconnecting...');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+        
+        // Form submission
+        document.addEventListener('DOMContentLoaded', () => {
+            connectWebSocket();
+            
+            const form = document.getElementById('projectRequestForm');
+            const messageDiv = document.getElementById('form-message');
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    project_description: document.getElementById('project_description').value,
+                    project_type: document.getElementById('project_type').value,
+                    budget: document.getElementById('budget').value,
+                    timeline: document.getElementById('timeline').value
+                };
+                
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/project-requests`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (response.ok) {
+                        messageDiv.textContent = 'Request submitted successfully!';
+                        messageDiv.className = 'form-message success';
+                        form.reset();
+                        setTimeout(() => {
+                            messageDiv.textContent = '';
+                            messageDiv.className = 'form-message';
+                        }, 5000);
+                    } else {
+                        const error = await response.json();
+                        messageDiv.textContent = error.detail || 'Error submitting request';
+                        messageDiv.className = 'form-message error';
+                    }
+                } catch (error) {
+                    messageDiv.textContent = 'Network error. Please try again.';
+                    messageDiv.className = 'form-message error';
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <header>
@@ -22,6 +100,7 @@
                 <ul>
                     <li><a href="index.html">HOME</a></li>
                     <li><a href="portfolio.html">PORTFOLIO</a></li>
+                    <li><a href="admin.html">ADMIN</a></li>
                 </ul>
             </nav>
         </div>
@@ -31,6 +110,10 @@
     <main>
         <div class="background-art"></div>
         <div class="content-box">
+            <div class="online-users-badge">
+                <span class="online-icon">🟢</span>
+                <span id="online-count">0</span> users online
+            </div>
             <input type="checkbox" id="toggleBtn" class="toggle-checkbox">
             <label for="toggleBtn" class="toggle-btn"></label>
             <section id="home">
@@ -47,6 +130,45 @@
                         I have worked on a bunch of projects ranging from character concept design to environment concept art and my favourite field is Visual Development
                     </p>
                 </div>
+            </section>
+
+            <section id="project-request" class="project-request-section">
+                <h2>Request a Project</h2>
+                <form id="projectRequestForm" class="project-form">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project_description">Project Description *</label>
+                        <textarea id="project_description" name="project_description" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="project_type">Project Type</label>
+                        <select id="project_type" name="project_type">
+                            <option value="">Select a type</option>
+                            <option value="character_design">Character Design</option>
+                            <option value="environment_art">Environment Art</option>
+                            <option value="visual_development">Visual Development</option>
+                            <option value="concept_art">Concept Art</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Budget</label>
+                        <input type="text" id="budget" name="budget" placeholder="e.g., $500-$1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="timeline">Timeline</label>
+                        <input type="text" id="timeline" name="timeline" placeholder="e.g., 2-3 weeks">
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Request</button>
+                    <div id="form-message" class="form-message"></div>
+                </form>
             </section>
 
         </div>
