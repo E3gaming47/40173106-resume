@@ -3,7 +3,12 @@
   "port": 80,
   "build": {
     "commands": [
-      "pip install -r requirements.txt"
+      "pip install -r requirements.txt",
+      "cp ../index.html . 2>/dev/null || true",
+      "cp ../portfolio.html . 2>/dev/null || true",
+      "cp ../admin.html . 2>/dev/null || true",
+      "cp ../styles.css . 2>/dev/null || true",
+      "cp ../portfolio.css . 2>/dev/null || true"
     ]
   },
   "start": {

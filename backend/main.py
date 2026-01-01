@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -223,14 +225,88 @@ async def startup_event():
         # Don't fail the app, just log the error
         print("✅ Application started (with database warnings)", file=sys.stdout, flush=True)
 
-@app.get("/")
-async def root():
+# API status endpoint (for API clients)
+@app.get("/api/status")
+async def api_status():
     return {
         "message": "Resume Backend API",
         "docs": "/docs",
         "status": "running",
         "version": "1.0.0"
     }
+
+# Serve frontend HTML files
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    """Serve the main index.html page"""
+    # Try current directory first (where files are copied during build)
+    base_dir = os.path.dirname(__file__)
+    index_path = os.path.join(base_dir, "index.html")
+    
+    # Fallback to parent directory
+    if not os.path.exists(index_path):
+        index_path = os.path.join(os.path.dirname(base_dir), "index.html")
+    
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    
+    # Fallback message
+    return HTMLResponse("""
+    <html>
+    <head><title>Resume API</title></head>
+    <body>
+        <h1>Resume Backend API</h1>
+        <p>Status: Running</p>
+        <p><a href="/docs">API Documentation</a></p>
+        <p>Frontend files not found. Please ensure index.html is accessible.</p>
+    </body>
+    </html>
+    """)
+
+@app.get("/portfolio.html", response_class=HTMLResponse)
+async def serve_portfolio():
+    """Serve the portfolio page"""
+    base_dir = os.path.dirname(__file__)
+    portfolio_path = os.path.join(base_dir, "portfolio.html")
+    if not os.path.exists(portfolio_path):
+        portfolio_path = os.path.join(os.path.dirname(base_dir), "portfolio.html")
+    if os.path.exists(portfolio_path):
+        return FileResponse(portfolio_path)
+    raise HTTPException(status_code=404, detail="Portfolio page not found")
+
+@app.get("/admin.html", response_class=HTMLResponse)
+async def serve_admin():
+    """Serve the admin page"""
+    base_dir = os.path.dirname(__file__)
+    admin_path = os.path.join(base_dir, "admin.html")
+    if not os.path.exists(admin_path):
+        admin_path = os.path.join(os.path.dirname(base_dir), "admin.html")
+    if os.path.exists(admin_path):
+        return FileResponse(admin_path)
+    raise HTTPException(status_code=404, detail="Admin page not found")
+
+# Serve CSS files
+@app.get("/styles.css")
+async def serve_styles():
+    """Serve the main stylesheet"""
+    base_dir = os.path.dirname(__file__)
+    styles_path = os.path.join(base_dir, "styles.css")
+    if not os.path.exists(styles_path):
+        styles_path = os.path.join(os.path.dirname(base_dir), "styles.css")
+    if os.path.exists(styles_path):
+        return FileResponse(styles_path, media_type="text/css")
+    raise HTTPException(status_code=404, detail="Stylesheet not found")
+
+@app.get("/portfolio.css")
+async def serve_portfolio_css():
+    """Serve the portfolio stylesheet"""
+    base_dir = os.path.dirname(__file__)
+    css_path = os.path.join(base_dir, "portfolio.css")
+    if not os.path.exists(css_path):
+        css_path = os.path.join(os.path.dirname(base_dir), "portfolio.css")
+    if os.path.exists(css_path):
+        return FileResponse(css_path, media_type="text/css")
+    raise HTTPException(status_code=404, detail="Portfolio stylesheet not found")
 
 @app.get("/health")
 async def health_check():

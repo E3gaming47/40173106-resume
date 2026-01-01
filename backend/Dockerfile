@@ -18,8 +18,16 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# کپی کردن فایل‌های پروژه
-COPY . .
+# کپی کردن فایل‌های بک‌اند
+COPY *.py ./
+COPY requirements.txt ./
+
+# کپی کردن فایل‌های فرانت‌اند از دایرکتوری والد
+COPY ../index.html ./
+COPY ../portfolio.html ./
+COPY ../admin.html ./
+COPY ../styles.css ./
+COPY ../portfolio.css ./
 
 # لیارا از پورت 80 استفاده می‌کند
 ENV PORT=80
