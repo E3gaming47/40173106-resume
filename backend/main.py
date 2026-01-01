@@ -10,9 +10,13 @@ from pydantic import BaseModel, EmailStr
 from database import SessionLocal, engine, Base
 from models import ProjectRequest, User
 import os
+import sys
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Create database tables (only if they don't exist)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Database initialization note: {e}")
 
 app = FastAPI(
     title="Resume Backend API",
@@ -153,11 +157,20 @@ def init_admin_user(db: Session):
 # Routes
 @app.on_event("startup")
 async def startup_event():
-    db = SessionLocal()
     try:
-        init_admin_user(db)
-    finally:
-        db.close()
+        # Ensure database tables exist
+        Base.metadata.create_all(bind=engine)
+        
+        # Initialize admin user
+        db = SessionLocal()
+        try:
+            init_admin_user(db)
+        finally:
+            db.close()
+        print("✅ Application started successfully", file=sys.stdout, flush=True)
+    except Exception as e:
+        print(f"⚠️ Startup warning: {e}", file=sys.stderr, flush=True)
+        # Don't fail the app, just log the error
 
 @app.get("/")
 async def root():
@@ -261,5 +274,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # لیارا از پورت 80 استفاده می‌کند
+    port = int(os.getenv("PORT", 80))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
