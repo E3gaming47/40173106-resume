@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Resume</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .login-section {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333333;
+            border-radius: 10px;
+        }
+        
+        .login-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #00aaff;
+        }
+        
+        .admin-panel {
+            display: none;
+        }
+        
+        .admin-panel.active {
+            display: block;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333333;
+        }
+        
+        .admin-header h1 {
+            color: #00aaff;
+            font-size: 2rem;
+        }
+        
+        .logout-btn {
+            padding: 0.5rem 1.5rem;
+            background-color: #ff4444;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .logout-btn:hover {
+            background-color: #cc0000;
+        }
+        
+        .requests-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .requests-table th,
+        .requests-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #333333;
+        }
+        
+        .requests-table th {
+            background-color: #111111;
+            color: #00aaff;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        
+        .requests-table td {
+            color: #cccccc;
+        }
+        
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        
+        .status-pending {
+            background-color: rgba(255, 200, 0, 0.2);
+            color: #ffc800;
+            border: 1px solid #ffc800;
+        }
+        
+        .status-in_progress {
+            background-color: rgba(0, 170, 255, 0.2);
+            color: #00aaff;
+            border: 1px solid #00aaff;
+        }
+        
+        .status-completed {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .status-rejected {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.4rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        
+        .btn-delete {
+            background-color: #ff4444;
+            color: #ffffff;
+        }
+        
+        .btn-delete:hover {
+            background-color: #cc0000;
+        }
+        
+        .btn-status {
+            background-color: #00aaff;
+            color: #ffffff;
+        }
+        
+        .btn-status:hover {
+            background-color: #0099dd;
+        }
+        
+        .status-select {
+            padding: 0.3rem;
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.85rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #cccccc;
+        }
+        
+        .error-message {
+            padding: 1rem;
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            border-radius: 4px;
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+        
+        .success-message {
+            padding: 1rem;
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            margin-bottom: 1rem;
+        }
+        
+        .request-details {
+            background-color: rgba(17, 17, 17, 0.5);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+        
+        .request-details p {
+            margin: 0.5rem 0;
+            color: #cccccc;
+        }
+        
+        .request-details strong {
+            color: #00aaff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo">DE</div>
+                <div class="logo-subtitle">Admin Panel</div>
+            </div>
+            <div class="header-center">
+                <div class="header-divider"></div>
+                <div class="header-tagline">Project Requests Management</div>
+                <div class="header-divider"></div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">HOME</a></li>
+                    <li><a href="portfolio.html">PORTFOLIO</a></li>
+                    <li><a href="admin.html">ADMIN</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-decoration"></div>
+    </header>
+
+    <main>
+        <div class="background-art"></div>
+        <div class="content-box">
+            <div class="admin-container">
+                <!-- Login Section -->
+                <div id="loginSection" class="login-section">
+                    <h2>Admin Login</h2>
+                    <form id="loginForm" class="project-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Login</button>
+                        <div id="login-message" class="form-message"></div>
+                    </form>
+                </div>
+
+                <!-- Admin Panel -->
+                <div id="adminPanel" class="admin-panel">
+                    <div class="admin-header">
+                        <h1>Project Requests</h1>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                    <div id="admin-messages"></div>
+                    <div id="requests-container">
+                        <div class="loading">Loading requests...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-label">Contact</div>
+            <div class="footer-divider"></div>
+            <a href="mailto:e3gaming47@gmail.com" class="footer-email">
+                <span class="email-icon">✉</span>
+                <span>e3gaming47@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let authToken = localStorage.getItem('authToken');
+
+        // Check if already logged in
+        if (authToken) {
+            showAdminPanel();
+            loadRequests();
+        }
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageDiv = document.getElementById('login-message');
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    localStorage.setItem('authToken', authToken);
+                    showAdminPanel();
+                    loadRequests();
+                } else {
+                    const error = await response.json();
+                    messageDiv.textContent = error.detail || 'Login failed';
+                    messageDiv.className = 'form-message error';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Network error. Please try again.';
+                messageDiv.className = 'form-message error';
+            }
+        });
+
+        function showAdminPanel() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('active');
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('authToken');
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('adminPanel').classList.remove('active');
+            document.getElementById('loginForm').reset();
+        }
+
+        async function loadRequests() {
+            const container = document.getElementById('requests-container');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/project-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load requests');
+                }
+                
+                const requests = await response.json();
+                displayRequests(requests);
+            } catch (error) {
+                container.innerHTML = `<div class="error-message">Error loading requests: ${error.message}</div>`;
+            }
+        }
+
+        function displayRequests(requests) {
+            const container = document.getElementById('requests-container');
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<div class="loading">No requests found.</div>';
+                return;
+            }
+            
+            let html = `
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Project Type</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            requests.forEach(request => {
+                const date = new Date(request.created_at).toLocaleDateString();
+                html += `
+                    <tr>
+                        <td>${request.id}</td>
+                        <td>${request.name}</td>
+                        <td>${request.email}</td>
+                        <td>${request.project_type || 'N/A'}</td>
+                        <td>
+                            <span class="status-badge status-${request.status}">${request.status}</span>
+                        </td>
+                        <td>${date}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-status" onclick="showDetails(${request.id})">Details</button>
+                                <select class="status-select" onchange="updateStatus(${request.id}, this.value)">
+                                    <option value="pending" ${request.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="in_progress" ${request.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="completed" ${request.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="rejected" ${request.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                                <button class="btn btn-delete" onclick="deleteRequest(${request.id})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function showDetails(requestId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/project-requests/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const request = await response.json();
+                    alert(`Details:\n\nName: ${request.name}\nEmail: ${request.email}\nDescription: ${request.project_description}\nBudget: ${request.budget || 'N/A'}\nTimeline: ${request.timeline || 'N/A'}\nType: ${request.project_type || 'N/A'}\nStatus: ${request.status}`);
+                }
+            } catch (error) {
+                showMessage('Error loading details', 'error');
+            }
+        }
+
+        async function updateStatus(requestId, newStatus) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/project-requests/${requestId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (response.ok) {
+                    showMessage('Status updated successfully', 'success');
+                    loadRequests();
+                } else {
+                    showMessage('Error updating status', 'error');
+                }
+            } catch (error) {
+                showMessage('Error updating status', 'error');
+            }
+        }
+
+        async function deleteRequest(requestId) {
+            if (!confirm('Are you sure you want to delete this request?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/project-requests/${requestId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showMessage('Request deleted successfully', 'success');
+                    loadRequests();
+                } else {
+                    showMessage('Error deleting request', 'error');
+                }
+            } catch (error) {
+                showMessage('Error deleting request', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('admin-messages');
+            const messageClass = type === 'success' ? 'success-message' : 'error-message';
+            messagesDiv.innerHTML = `<div class="${messageClass}">${message}</div>`;
+            setTimeout(() => {
+                messagesDiv.innerHTML = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
